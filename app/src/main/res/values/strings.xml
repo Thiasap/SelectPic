@@ -2,14 +2,8 @@
     <string name="app_name">SelectPic</string>
     <string name="ChoosePic">Choose A Pic</string>
     <string name="Tips">
-        第2个版本,功能较少bug较多。\n
         长摁选择显示的图片，下次打开软件会直接显示这张图片。\n
         本软件只在18:9的机器上测试过，出现bug短时间尽量改\n
-        利用PhotoView(bm-x@github)实现双指控制放大缩小功能\n\n
-        TODO\n
-        目前重启软件缩放旋转会重置\n
-        争取能让它不只是90°整倍地旋转\n
-        集成所有设置到一个功能键放到右下角，并自动隐藏\n\n
 
         本软件没有自动更新，请到酷安自行下载更新
     </string>
