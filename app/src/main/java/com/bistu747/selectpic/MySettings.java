@@ -2,6 +2,7 @@ package com.bistu747.selectpic;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import permison.FloatWindowManager;
 
 public class MySettings extends Activity {
     private SharedPreferences sharedPreferences;
@@ -67,6 +70,9 @@ public class MySettings extends Activity {
                     editor.putString("BackRun","false");
                 }else{
                     editor.putString("BackRun","true");
+                    FloatWindowManager.getInstance().applyOrShowFloatWindow(MySettings.this);
+                    Intent serviceIntent = new Intent(MySettings.this,MainService.class);
+                    startService(serviceIntent);
                 }
                 editor.apply();
             }

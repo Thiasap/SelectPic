@@ -65,13 +65,14 @@ public class MainActivity extends Activity {
         PermissonUtil.checkPermission(MainActivity.this, new PermissionListener() {
             @Override
             public void havePermission() {
-                load();
             }
             @Override
             public void requestPermissionFail() {
                 Toast.makeText(MainActivity.this, "权限获取失败，程序可能无法使用", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE});
+        load();
     }
     void load() {
         for (int i = 0; i < 3; i++) {
@@ -82,7 +83,7 @@ public class MainActivity extends Activity {
             view[i].setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    //Toast.makeText(ViewPagerActivity.this,"Long Click!",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this,"Long Click!",Toast.LENGTH_SHORT).show();
                     //openAlbum();
                     showListDialog();
                     return true;
@@ -113,7 +114,6 @@ public class MainActivity extends Activity {
                 mlog( "now create position " + position);
                 view[position].enable();
                 view[position].setScaleType(ImageView.ScaleType.FIT_CENTER);
-                //view[position].setImageResource(imgsId[position]);
                 displayImage(ImgPaths[position],position);
                 view[position].setMaxScale(MAX_SCALE);
                 container.addView(view[position]);
