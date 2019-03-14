@@ -6,7 +6,7 @@ android {
         applicationId "com.bistu747.selectpic"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 4
+        versionCode 5
         versionName "1.3"
 
     }

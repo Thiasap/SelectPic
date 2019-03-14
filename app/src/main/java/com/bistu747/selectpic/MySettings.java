@@ -89,7 +89,7 @@ public class MySettings extends Activity {
         RB_Empty = findViewById(R.id.RB_Empty);
         RB_OpenApp = findViewById(R.id.RB_OpenApp);
         RB_OpenPic = findViewById(R.id.RB_OpenPic);
-        int Transparency = sharedPreferences.getInt("Transparency",0);
+        int Transparency = sharedPreferences.getInt("Transparency",50);
         ET_Transparency.setText(String.valueOf(Transparency));
         Log.e(" ","Transparency"+Transparency);
         ImgPre.setAlpha(((float)Transparency)/100);
