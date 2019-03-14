@@ -7,4 +7,16 @@
 
         本软件没有自动更新，请到酷安自行下载更新
     </string>
+    <string name="Settings">设置</string>
+    <string name="ChangePic">更换图片</string>
+    <string name="SharePic">分享图片</string>
+    <string name="SpWd">悬浮窗设置(单击)</string>
+    <string name="spOp">打开App</string>
+    <string name="ImgSp">悬浮显示图片(建设中……)</string>
+    <string name="NullStr">空</string>
+    <string name="Transparency">透明度：</string>
+    <string name="z2h">0-100</string>
+    <string name="Preview">预览</string>
+    <string name="saveAll">保存所有更改</string>
+    <string name="SettingTODO">长按悬浮窗关闭悬浮窗（会有60ms震动提示）</string>
 </resources>

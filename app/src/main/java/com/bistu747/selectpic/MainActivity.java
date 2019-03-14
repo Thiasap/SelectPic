@@ -1,14 +1,15 @@
 package com.bistu747.selectpic;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.v4.app.ActivityCompat;
+import android.os.Build;
+
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.provider.Settings;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
@@ -29,6 +31,10 @@ import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 
 import java.util.List;
+
+import permison.FloatWindowManager;
+import permison.PermissonUtil;
+import permison.listener.PermissionListener;
 
 public class MainActivity extends Activity {
 
@@ -40,6 +46,7 @@ public class MainActivity extends Activity {
     private Uri[] ImgPaths = new Uri[MAX_PIC];
     private int lastPosition;
     PhotoView[] view = new PhotoView[3];
+    private Intent serviceIntent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,12 +54,24 @@ public class MainActivity extends Activity {
         init();
     }
     void init(){
-        sharedPreferences = getSharedPreferences("ImgPath", Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("Config", Context.MODE_PRIVATE);
         mPager = (ViewPager) findViewById(R.id.pager);
         FirstStart = (TextView) findViewById(R.id.FirstStart);
-
-        checkPermissions(MainActivity.this);
-        load();
+        if(sharedPreferences.getString("BackRun","").equals("true")) {
+            FloatWindowManager.getInstance().applyOrShowFloatWindow(MainActivity.this);
+            serviceIntent = new Intent(MainActivity.this,MainService.class);
+            startService(serviceIntent);
+        }
+        PermissonUtil.checkPermission(MainActivity.this, new PermissionListener() {
+            @Override
+            public void havePermission() {
+                load();
+            }
+            @Override
+            public void requestPermissionFail() {
+                Toast.makeText(MainActivity.this, "权限获取失败，程序可能无法使用", Toast.LENGTH_SHORT).show();
+            }
+        }, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE});
     }
     void load() {
         for (int i = 0; i < 3; i++) {
@@ -137,7 +156,9 @@ public class MainActivity extends Activity {
 
     //dialog
     private void showListDialog() {
-        final String[] items = { "更换图片","分享图片"};
+        final String[] items = { this.getString(R.string.Settings),
+                this.getString(R.string.ChangePic),
+                this.getString(R.string.SharePic)};
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(MainActivity.this);
         //listDialog.setTitle("选择...");
@@ -148,6 +169,10 @@ public class MainActivity extends Activity {
                 // ...To-do
                 switch (which){
                     case 0:
+                        Intent intent = new Intent(MainActivity.this, MySettings.class);
+                        startActivity(intent);
+                        break;
+                    case 1:
                         Matisse.from(MainActivity.this)
                                 .choose(MimeType.ofImage(), false)//图片类型
                                 .countable(false)//true:选中后显示数字;false:选中后显示对号
@@ -158,7 +183,7 @@ public class MainActivity extends Activity {
                                 .imageEngine(new GlideLoadEngine())//图片加载引擎
                                 .forResult(1);//
                         break;
-                    case 1:
+                    case 2:
                         //share
                         if (ImgPaths[lastPosition] == null){
                             Toast.makeText(MainActivity.this,
@@ -194,6 +219,14 @@ public class MainActivity extends Activity {
     //选择图片回调
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0) {
+            if (Build.VERSION.SDK_INT >= 23&&!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "授权成功", Toast.LENGTH_SHORT).show();
+                startService(new Intent(MainActivity.this, MainService.class));
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             List<Uri> result = Matisse.obtainResult(data);
@@ -226,7 +259,9 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Failed to load image(May be deleted)", Toast.LENGTH_SHORT).show();
         }
     }
-    //权限相关
+
+
+    /*权限相关
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
             "android.permission.READ_EXTERNAL_STORAGE",
@@ -244,5 +279,27 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    */
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (serviceIntent != null) {
+            stopService(serviceIntent);
+        }
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (serviceIntent != null) {
+            stopService(serviceIntent);
+        }
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        startService(serviceIntent);
     }
 }
