@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -26,6 +29,7 @@ public class MySettings extends Activity {
     RadioButton RB_Empty;
     RadioButton RB_OpenApp;
     RadioButton RB_OpenPic;
+    SwitchCompat wakeup;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +81,19 @@ public class MySettings extends Activity {
                 editor.apply();
             }
         });
+        wakeup.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("wakeup",isChecked);
+                if(isChecked){
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }else{
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+                editor.apply();
+            }
+        });
     }
     private void init(){
         sharedPreferences = getSharedPreferences("Config", Context.MODE_PRIVATE);
@@ -93,6 +110,8 @@ public class MySettings extends Activity {
         ET_Transparency.setText(String.valueOf(Transparency));
         Log.e(" ","Transparency"+Transparency);
         ImgPre.setAlpha(((float)Transparency)/100);
+        wakeup = findViewById(R.id.wakeup);
+        wakeup.setChecked(sharedPreferences.getBoolean("wakeup",false));
         switch (SuspensionW){
             case "":
                 RB_Empty.setChecked(true);

@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
         load();
     }
     void load() {
+
         for (int i = 0; i < 3; i++) {
             String str = sharedPreferences.getString("Path" + i, null);
             if (str!=null) ImgPaths[i] = Uri.parse((String) str);
@@ -294,6 +295,14 @@ public class MainActivity extends Activity {
         super.onStart();
         if (serviceIntent != null) {
             stopService(serviceIntent);
+        }
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if(sharedPreferences.getBoolean("wakeup",false)){
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            Log.i("MainActivity","wake up!");
         }
     }
 

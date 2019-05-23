@@ -124,6 +124,7 @@ public class MainService extends Service {
                 if(vb!=null)
                     vb.vibrate(60);
                 stopSelf();
+                System.exit(0);
                 return false;
             }
         });

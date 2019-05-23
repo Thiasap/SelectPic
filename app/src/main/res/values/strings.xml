@@ -19,4 +19,5 @@
     <string name="Preview">预览</string>
     <string name="saveAll">保存所有更改</string>
     <string name="SettingTODO">长按悬浮窗关闭悬浮窗（会有60ms震动提示）</string>
+    <string name="wakeup">保持唤醒</string>
 </resources>
