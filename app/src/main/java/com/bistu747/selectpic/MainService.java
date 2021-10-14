@@ -9,7 +9,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Vibrator;
-import android.support.constraint.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -123,7 +123,7 @@ public class MainService extends Service {
                 Vibrator vb  = (Vibrator)MainService.this.getSystemService(Service.VIBRATOR_SERVICE);
                 if(vb!=null)
                     vb.vibrate(60);
-                stopSelf();
+                //stopSelf();
                 System.exit(0);
                 return false;
             }

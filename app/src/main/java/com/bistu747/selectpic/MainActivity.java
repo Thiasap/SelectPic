@@ -10,8 +10,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.provider.Settings;
 
-import com.bm.library.PhotoView;
+import com.bistu747.selectpic.photoview.PhotoView;
 import com.bumptech.glide.Glide;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
@@ -55,8 +55,8 @@ public class MainActivity extends Activity {
     }
     void init(){
         sharedPreferences = getSharedPreferences("Config", Context.MODE_PRIVATE);
-        mPager = (ViewPager) findViewById(R.id.pager);
-        FirstStart = (TextView) findViewById(R.id.FirstStart);
+        mPager = findViewById(R.id.pager);
+        FirstStart = findViewById(R.id.FirstStart);
         if(sharedPreferences.getString("BackRun","").equals("true")) {
             FloatWindowManager.getInstance().applyOrShowFloatWindow(MainActivity.this);
             serviceIntent = new Intent(MainActivity.this,MainService.class);
@@ -75,7 +75,6 @@ public class MainActivity extends Activity {
         load();
     }
     void load() {
-
         for (int i = 0; i < 3; i++) {
             String str = sharedPreferences.getString("Path" + i, null);
             if (str!=null) ImgPaths[i] = Uri.parse((String) str);
@@ -84,8 +83,6 @@ public class MainActivity extends Activity {
             view[i].setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    //Toast.makeText(MainActivity.this,"Long Click!",Toast.LENGTH_SHORT).show();
-                    //openAlbum();
                     showListDialog();
                     return true;
                 }
@@ -113,7 +110,10 @@ public class MainActivity extends Activity {
             @Override
             public Object instantiateItem(ViewGroup container, final int position) {
                 mlog( "now create position " + position);
-                view[position].enable();
+                if (sharedPreferences.getBoolean("zoom", true))
+                    view[position].enableRotate();
+                else
+                    view[position].disableRotate();
                 view[position].setScaleType(ImageView.ScaleType.FIT_CENTER);
                 displayImage(ImgPaths[position],position);
                 view[position].setMaxScale(MAX_SCALE);
@@ -262,27 +262,6 @@ public class MainActivity extends Activity {
     }
 
 
-    /*权限相关
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE"};
-
-    public static void checkPermissions(Activity activity) {
-        try {
-            //检测是否有读的权限
-            int permission = ActivityCompat.checkSelfPermission(activity,
-                    "android.permission.READ_EXTERNAL_STORAGE");
-            if (permission != PackageManager.PERMISSION_GRANTED) {
-                // 没有写的权限，去申请写的权限，会弹出对话框
-                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    */
-
     @Override
     protected void onRestart() {
         super.onRestart();
@@ -303,6 +282,15 @@ public class MainActivity extends Activity {
         if(sharedPreferences.getBoolean("wakeup",false)){
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             Log.i("MainActivity","wake up!");
+        }
+        if(sharedPreferences.getBoolean("zoom",true)){
+            //view[0].enableRotate();
+            //view[1].enableRotate();
+            //view[2].enableRotate();
+        }else{
+            //view[0].disableRotate();
+            //view[1].disableRotate();
+            //view[2].disableRotate();
         }
     }
 

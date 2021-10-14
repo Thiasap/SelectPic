@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.widget.SwitchCompat;
+import androidx.appcompat.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -30,6 +30,7 @@ public class MySettings extends Activity {
     RadioButton RB_OpenApp;
     RadioButton RB_OpenPic;
     SwitchCompat wakeup;
+    SwitchCompat zoom;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +95,14 @@ public class MySettings extends Activity {
                 editor.apply();
             }
         });
+        zoom.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("zoom",b);
+                editor.apply();
+            }
+        });
     }
     private void init(){
         sharedPreferences = getSharedPreferences("Config", Context.MODE_PRIVATE);
@@ -112,6 +121,8 @@ public class MySettings extends Activity {
         ImgPre.setAlpha(((float)Transparency)/100);
         wakeup = findViewById(R.id.wakeup);
         wakeup.setChecked(sharedPreferences.getBoolean("wakeup",false));
+        zoom = findViewById(R.id.zoom);
+        zoom.setChecked(sharedPreferences.getBoolean("zoom",true));
         switch (SuspensionW){
             case "":
                 RB_Empty.setChecked(true);
