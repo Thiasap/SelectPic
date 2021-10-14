@@ -284,13 +284,13 @@ public class MainActivity extends Activity {
             Log.i("MainActivity","wake up!");
         }
         if(sharedPreferences.getBoolean("zoom",true)){
-            //view[0].enableRotate();
-            //view[1].enableRotate();
-            //view[2].enableRotate();
+            view[0].enableRotate();
+            view[1].enableRotate();
+            view[2].enableRotate();
         }else{
-            //view[0].disableRotate();
-            //view[1].disableRotate();
-            //view[2].disableRotate();
+            view[0].disableRotate();
+            view[1].disableRotate();
+            view[2].disableRotate();
         }
     }
 
