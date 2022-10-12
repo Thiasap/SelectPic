@@ -113,6 +113,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
                 <TextView
                     android:layout_width="wrap_content"
@@ -134,6 +135,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
                 <TextView
                     android:layout_width="wrap_content"
@@ -144,6 +146,28 @@
                     android:layout_marginStart="10dp" />
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/zoom"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="end"/>
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/gray_1"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/changeName"
+                    android:textSize="20sp"
+                    android:textColor="@color/black"
+                    android:layout_marginStart="10dp" />
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/changeName"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="end"/>

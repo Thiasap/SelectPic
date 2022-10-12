@@ -3,10 +3,12 @@ package com.bistu747.selectpic;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 
@@ -186,8 +188,8 @@ public class MainActivity extends Activity {
                 // ...To-do
                 switch (which){
                     case 0:
-                        //Intent intent = new Intent(MainActivity.this, MySettings.class);
-                        Intent intent = new Intent(MainActivity.this, mSettings.class);
+                        Intent intent = new Intent(MainActivity.this, MySettings.class);
+                        //Intent intent = new Intent(MainActivity.this, mSettings.class);
                         startActivity(intent);
                         break;
                     case 1:

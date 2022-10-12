@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">SelectPic</string>
+    <string name="app_name">SelectPic - 快速展示图片</string>
+    <string name="app_NewName">SelectPic</string>
     <string name="ChoosePic">Choose A Pic</string>
     <string name="Tips">
         长摁选择显示的图片，下次打开软件会直接显示这张图片。\n
@@ -22,6 +23,7 @@
     <string name="SettingTODO">长按悬浮窗关闭悬浮窗（会有60ms震动提示）</string>
     <string name="wakeup">保持唤醒</string>
     <string name="zoom">启用缩放</string>
+    <string name="changeName">桌面图标名称显示为“SelectPic”</string>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>

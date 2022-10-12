@@ -1,9 +1,11 @@
 package com.bistu747.selectpic;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.appcompat.widget.SwitchCompat;
 import android.util.Log;
@@ -31,6 +33,7 @@ public class MySettings extends Activity {
     RadioButton RB_OpenPic;
     SwitchCompat wakeup;
     SwitchCompat zoom;
+    SwitchCompat changeName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +106,15 @@ public class MySettings extends Activity {
                 editor.apply();
             }
         });
+        changeName.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                setActivityEnable(!b);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("changeName",b);
+                editor.apply();
+            }
+        });
     }
     private void init(){
         sharedPreferences = getSharedPreferences("Config", Context.MODE_PRIVATE);
@@ -123,6 +135,8 @@ public class MySettings extends Activity {
         wakeup.setChecked(sharedPreferences.getBoolean("wakeup",false));
         zoom = findViewById(R.id.zoom);
         zoom.setChecked(sharedPreferences.getBoolean("zoom",true));
+        changeName = findViewById(R.id.changeName);
+        changeName.setChecked(sharedPreferences.getBoolean("changeName",false));
         switch (SuspensionW){
             case "":
                 RB_Empty.setChecked(true);
@@ -136,5 +150,19 @@ public class MySettings extends Activity {
             default:
                 break;
         }
+    }
+    private void setActivityEnable(boolean change){
+        String disableAct = ".NewMainActivity",enableAct = ".MainActivity";
+        if (change){
+            disableAct = ".MainActivity";
+            enableAct = ".NewMainActivity";
+        }
+        PackageManager packageManager = getPackageManager();
+        packageManager.setComponentEnabledSetting(new ComponentName(this, getPackageName() +
+                        disableAct), PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP);
+        packageManager.setComponentEnabledSetting(new ComponentName(this, getPackageName() +
+                enableAct), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager
+                .DONT_KILL_APP);
     }
 }
