@@ -9,6 +9,7 @@
     </string>
     <string name="Settings">设置</string>
     <string name="ChangePic">更换图片</string>
+    <string name="DeletePic">删除图片</string>
     <string name="SharePic">分享图片</string>
     <string name="SpWd">悬浮窗设置(单击)</string>
     <string name="spOp">打开App</string>
@@ -21,4 +22,18 @@
     <string name="SettingTODO">长按悬浮窗关闭悬浮窗（会有60ms震动提示）</string>
     <string name="wakeup">保持唤醒</string>
     <string name="zoom">启用缩放</string>
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 </resources>

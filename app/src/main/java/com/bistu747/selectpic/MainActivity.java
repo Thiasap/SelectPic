@@ -13,6 +13,7 @@ import android.os.Build;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -30,6 +31,17 @@ import com.bumptech.glide.Glide;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import permison.FloatWindowManager;
@@ -43,10 +55,11 @@ public class MainActivity extends Activity {
     private TextView FirstStart;
     private SharedPreferences sharedPreferences;
     private ViewPager mPager;
-    private Uri[] ImgPaths = new Uri[MAX_PIC];
+    private String[] ImgPaths = new String[MAX_PIC];
     private int lastPosition;
     PhotoView[] view = new PhotoView[3];
     private Intent serviceIntent;
+    static Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +67,7 @@ public class MainActivity extends Activity {
         init();
     }
     void init(){
+        context = getApplicationContext();
         sharedPreferences = getSharedPreferences("Config", Context.MODE_PRIVATE);
         mPager = findViewById(R.id.pager);
         FirstStart = findViewById(R.id.FirstStart);
@@ -77,7 +91,8 @@ public class MainActivity extends Activity {
     void load() {
         for (int i = 0; i < 3; i++) {
             String str = sharedPreferences.getString("Path" + i, null);
-            if (str!=null) ImgPaths[i] = Uri.parse((String) str);
+            //if (str!=null) ImgPaths[i] = Uri.parse((String) str);
+            if (str!=null) ImgPaths[i] = str;
             else ImgPaths[i]=null;
             view[i]= new PhotoView(MainActivity.this);
             view[i].setOnLongClickListener(new View.OnLongClickListener() {
@@ -159,7 +174,8 @@ public class MainActivity extends Activity {
     private void showListDialog() {
         final String[] items = { this.getString(R.string.Settings),
                 this.getString(R.string.ChangePic),
-                this.getString(R.string.SharePic)};
+                this.getString(R.string.SharePic),
+                this.getString(R.string.DeletePic)};
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(MainActivity.this);
         //listDialog.setTitle("选择...");
@@ -170,7 +186,8 @@ public class MainActivity extends Activity {
                 // ...To-do
                 switch (which){
                     case 0:
-                        Intent intent = new Intent(MainActivity.this, MySettings.class);
+                        //Intent intent = new Intent(MainActivity.this, MySettings.class);
+                        Intent intent = new Intent(MainActivity.this, mSettings.class);
                         startActivity(intent);
                         break;
                     case 1:
@@ -179,14 +196,12 @@ public class MainActivity extends Activity {
                                 .countable(false)//true:选中后显示数字;false:选中后显示对号
                                 .maxSelectable(1)//可选的最大数
                                 .capture(false)//选择照片时，是否显示拍照
-                                //.captureStrategy(new CaptureStrategy(true, "com.example.xx.fileprovider"))//参数1 true表示拍照存储在共有目录，false表示存储在私有目录；参数2与 AndroidManifest中authorities值相同，用于适配7.0系统 必须设置
                                 .thumbnailScale(0.87f)//缩略图的清晰程度(与内存占用有关)
-                                .imageEngine(new GlideLoadEngine())//图片加载引擎
                                 .forResult(1);//
                         break;
                     case 2:
                         //share
-                        if (ImgPaths[lastPosition] == null){
+                        if(ImgPaths[lastPosition] == null){
                             Toast.makeText(MainActivity.this,
                                     "当前没有图片可分享！",
                                     Toast.LENGTH_SHORT).show();
@@ -198,6 +213,12 @@ public class MainActivity extends Activity {
                         shareIntent.putExtra(Intent.EXTRA_STREAM, ImgPaths[lastPosition]);
                         shareIntent.setType("image/jpeg");
                         startActivity(Intent.createChooser(shareIntent,"分享图片到..."));
+                        break;
+                    case 3:
+                        context.deleteFile(lastPosition+".jpg");
+                        SharedPreferences.Editor editor = sharedPreferences.edit();//存下地址
+                        editor.remove("Path"+lastPosition);
+                        editor.apply();
                         break;
                     default:
                         break;
@@ -232,8 +253,10 @@ public class MainActivity extends Activity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             List<Uri> result = Matisse.obtainResult(data);
             Uri path = result.get(0);
-            displayImage(path,lastPosition);
-            mlog("path "+path);
+            String FPath = context.getFilesDir().getPath()+"/"+lastPosition+".jpg";
+            copyFile(path,lastPosition+".jpg");
+            displayImage(FPath,lastPosition);
+            mlog("uri path "+path+"\n path = "+FPath);
         }
     }
     //自定义log
@@ -242,7 +265,7 @@ public class MainActivity extends Activity {
         Log.d(TAG,log);
     }
     //展示图片
-    private void displayImage(Uri imagePath, int position) {
+    private void displayImage(String imagePath, int position) {
         mlog("Display image "+imagePath+" position is "+position);
         if(imagePath != null){
             if (imagePath!=ImgPaths[position]){
@@ -252,15 +275,72 @@ public class MainActivity extends Activity {
                 ImgPaths[position] = imagePath;
             }
             mlog("Glide run ");
+            byte[] imgBy = readPic(position+".jpg");
             Glide.with(MainActivity.this)
-                    .load(imagePath)
+                    //.load(imagePath)
+                    .load(imgBy)
                     .into(view[position]);
             FirstStart.setVisibility(View.INVISIBLE);
         }else if(ImgPaths[position]!=null){
             Toast.makeText(this, "Failed to load image(May be deleted)", Toast.LENGTH_SHORT).show();
         }
     }
-
+    public static byte[] readPic(String fileName){
+        try {
+            FileInputStream inputStream = context.openFileInput(fileName);
+            if (inputStream == null) return null;
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+            byte[] b = new byte[1024];
+            int n;
+            while ((n = inputStream.read(b)) != -1) {
+                bos.write(b, 0, n);
+            }
+            inputStream.close();
+            byte[] data = bos.toByteArray();
+            bos.close();
+            return data;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "".getBytes();
+    }
+    public static int copyStream(FileInputStream input, FileOutputStream output) throws Exception, IOException {
+        final int BUFFER_SIZE = 1024 * 2;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        BufferedInputStream in = new BufferedInputStream(input, BUFFER_SIZE);
+        BufferedOutputStream out = new BufferedOutputStream(output, BUFFER_SIZE);
+        int count = 0, n = 0;
+        try {
+            while ((n = in.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                out.write(buffer, 0, n);
+                count += n;
+            }
+            out.flush();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+            }
+            try {
+                in.close();
+            } catch (IOException e) {
+            }
+        }
+        return count;
+    }
+    public static void copyFile(Uri imagePath, String dstFile){
+        try {
+            FileInputStream inputStream = (FileInputStream)context.getContentResolver().openInputStream(imagePath);
+            if (inputStream == null) return;
+            //FileOutputStream outputStream = new FileOutputStream(dstFile);
+            FileOutputStream outputStream = context.openFileOutput(dstFile,Context.MODE_PRIVATE);
+            copyStream(inputStream, outputStream);
+            inputStream.close();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void onRestart() {
