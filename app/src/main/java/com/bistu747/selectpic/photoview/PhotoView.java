@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.ImageView;
+import androidx.appcompat.widget.AppCompatImageView;
 import android.widget.OverScroller;
 import android.widget.Scroller;
 
@@ -24,7 +24,7 @@ import android.widget.Scroller;
  * <p></p>
  * 如有任何意见和建议可邮件  bmme@vip.qq.com
  */
-public class PhotoView extends ImageView {
+public class PhotoView extends AppCompatImageView {
 
     private final static int MIN_ROTATE = 35;
     private final static int ANIMA_DURING = 340;
@@ -202,7 +202,7 @@ public class PhotoView extends ImageView {
     /**
      * 禁用缩放功能
      */
-    public void disenable() {
+    public void disable() {
         isEnable = false;
     }
 
@@ -1213,7 +1213,7 @@ public class PhotoView extends ImageView {
         return new Info(rect, mImgRect, mWidgetRect, mBaseRect, mScreenCenter, mScale, mDegrees, mScaleType);
     }
 
-    public static Info getImageViewInfo(ImageView imgView) {
+    public static Info getImageViewInfo(AppCompatImageView imgView) {
         int[] p = new int[2];
         getLocation(imgView, p);
 

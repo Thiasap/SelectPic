@@ -2,7 +2,7 @@ package com.bistu747.selectpic.photoview;
 
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.widget.ImageView;
+import androidx.appcompat.widget.AppCompatImageView;
 
 /**
  * Created by liuheng on 2015/8/19.
@@ -25,9 +25,9 @@ public class Info {
 
     float mDegrees;
 
-    ImageView.ScaleType mScaleType;
+    AppCompatImageView.ScaleType mScaleType;
 
-    public Info(RectF rect, RectF img, RectF widget, RectF base, PointF screenCenter, float scale, float degrees, ImageView.ScaleType scaleType) {
+    public Info(RectF rect, RectF img, RectF widget, RectF base, PointF screenCenter, float scale, float degrees, AppCompatImageView.ScaleType scaleType) {
         mRect.set(rect);
         mImgRect.set(img);
         mWidgetRect.set(widget);

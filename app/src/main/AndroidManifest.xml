@@ -16,9 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/FullScreenTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity
-            android:name=".mSettings"
-            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask">

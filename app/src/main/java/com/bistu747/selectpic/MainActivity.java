@@ -3,19 +3,21 @@ package com.bistu747.selectpic;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -23,7 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
+import androidx.appcompat.widget.AppCompatImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.provider.Settings;
@@ -36,21 +38,16 @@ import com.zhihu.matisse.MimeType;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import permison.FloatWindowManager;
 import permison.PermissonUtil;
 import permison.listener.PermissionListener;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     final private int MAX_PIC = 3;
     final private int MAX_SCALE = 4;
@@ -61,7 +58,7 @@ public class MainActivity extends Activity {
     private int lastPosition;
     PhotoView[] view = new PhotoView[3];
     private Intent serviceIntent;
-    static Context context;
+    private Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,15 +84,13 @@ public class MainActivity extends Activity {
                 Toast.makeText(MainActivity.this, "权限获取失败，程序可能无法使用", Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE});
+        }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
         load();
     }
     void load() {
         for (int i = 0; i < 3; i++) {
             String str = sharedPreferences.getString("Path" + i, null);
-            //if (str!=null) ImgPaths[i] = Uri.parse((String) str);
-            if (str!=null) ImgPaths[i] = str;
-            else ImgPaths[i]=null;
+            ImgPaths[i] = str;
             view[i]= new PhotoView(MainActivity.this);
             view[i].setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -108,7 +103,7 @@ public class MainActivity extends Activity {
         lastPosition = sharedPreferences.getInt("lastPosition", 0);
         if(ImgPaths[lastPosition]!=null){
             FirstStart.setVisibility(View.INVISIBLE);
-            mlog(ImgPaths[lastPosition].toString());
+            mlog(ImgPaths[lastPosition]);
         }
         else FirstStart.setVisibility(View.VISIBLE);
         mlog("last position is :"+lastPosition);
@@ -127,11 +122,15 @@ public class MainActivity extends Activity {
             @Override
             public Object instantiateItem(ViewGroup container, final int position) {
                 mlog( "now create position " + position);
-                if (sharedPreferences.getBoolean("zoom", true))
+                if (sharedPreferences.getBoolean("zoom", true)){
                     view[position].enableRotate();
-                else
+                    view[position].enable();
+                }
+                else{
                     view[position].disableRotate();
-                view[position].setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    view[position].disable();
+                }
+                view[position].setScaleType(AppCompatImageView.ScaleType.FIT_CENTER);
                 displayImage(ImgPaths[position],position);
                 view[position].setMaxScale(MAX_SCALE);
                 container.addView(view[position]);
@@ -159,7 +158,7 @@ public class MainActivity extends Activity {
                 editor.apply();
                 if(ImgPaths[position]!=null){
                     FirstStart.setVisibility(View.INVISIBLE);
-                    mlog(ImgPaths[position].toString());
+                    mlog(ImgPaths[position]);
                 }
                 else FirstStart.setVisibility(View.VISIBLE);
             }
@@ -171,7 +170,6 @@ public class MainActivity extends Activity {
 
         });
     }
-
     //dialog
     private void showListDialog() {
         final String[] items = { this.getString(R.string.Settings),
@@ -199,7 +197,7 @@ public class MainActivity extends Activity {
                                 .maxSelectable(1)//可选的最大数
                                 .capture(false)//选择照片时，是否显示拍照
                                 .thumbnailScale(0.87f)//缩略图的清晰程度(与内存占用有关)
-                                .forResult(1);//
+                                .forResult(1);
                         break;
                     case 2:
                         //share
@@ -267,19 +265,19 @@ public class MainActivity extends Activity {
         Log.d(TAG,log);
     }
     //展示图片
+    //private void displayImage(String imagePath, int position) {
     private void displayImage(String imagePath, int position) {
         mlog("Display image "+imagePath+" position is "+position);
         if(imagePath != null){
-            if (imagePath!=ImgPaths[position]){
+            if (!imagePath.equals(ImgPaths[position])){
                 SharedPreferences.Editor editor = sharedPreferences.edit();//存下地址
-                editor.putString("Path"+position, imagePath.toString());
+                editor.putString("Path"+position, imagePath);
                 editor.apply();
                 ImgPaths[position] = imagePath;
             }
             mlog("Glide run ");
             byte[] imgBy = readPic(position+".jpg");
             Glide.with(MainActivity.this)
-                    //.load(imagePath)
                     .load(imgBy)
                     .into(view[position]);
             FirstStart.setVisibility(View.INVISIBLE);
@@ -287,7 +285,7 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Failed to load image(May be deleted)", Toast.LENGTH_SHORT).show();
         }
     }
-    public static byte[] readPic(String fileName){
+    public byte[] readPic(String fileName){
         try {
             FileInputStream inputStream = context.openFileInput(fileName);
             if (inputStream == null) return null;
@@ -306,12 +304,12 @@ public class MainActivity extends Activity {
         }
         return "".getBytes();
     }
-    public static int copyStream(FileInputStream input, FileOutputStream output) throws Exception, IOException {
+    public int copyStream(FileInputStream input, FileOutputStream output) throws Exception {
         final int BUFFER_SIZE = 1024 * 2;
         byte[] buffer = new byte[BUFFER_SIZE];
         BufferedInputStream in = new BufferedInputStream(input, BUFFER_SIZE);
         BufferedOutputStream out = new BufferedOutputStream(output, BUFFER_SIZE);
-        int count = 0, n = 0;
+        int count = 0, n;
         try {
             while ((n = in.read(buffer, 0, BUFFER_SIZE)) != -1) {
                 out.write(buffer, 0, n);
@@ -330,11 +328,10 @@ public class MainActivity extends Activity {
         }
         return count;
     }
-    public static void copyFile(Uri imagePath, String dstFile){
+    public void copyFile(Uri imagePath, String dstFile){
         try {
             FileInputStream inputStream = (FileInputStream)context.getContentResolver().openInputStream(imagePath);
             if (inputStream == null) return;
-            //FileOutputStream outputStream = new FileOutputStream(dstFile);
             FileOutputStream outputStream = context.openFileOutput(dstFile,Context.MODE_PRIVATE);
             copyStream(inputStream, outputStream);
             inputStream.close();
@@ -366,13 +363,15 @@ public class MainActivity extends Activity {
             Log.i("MainActivity","wake up!");
         }
         if(sharedPreferences.getBoolean("zoom",true)){
-            view[0].enableRotate();
-            view[1].enableRotate();
-            view[2].enableRotate();
+            for(int i=0;i<3;i++){
+                view[i].enable();
+                view[i].enableRotate();
+            }
         }else{
-            view[0].disableRotate();
-            view[1].disableRotate();
-            view[2].disableRotate();
+            for(int i=0;i<3;i++){
+                view[i].disable();
+                view[i].disableRotate();
+            }
         }
     }
 
